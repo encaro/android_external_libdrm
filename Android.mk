@@ -120,7 +120,8 @@ LOCAL_VENDOR_MODULE := true
 LOCAL_SRC_FILES := $(filter-out %.h,$(LIBDRM_FILES))
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
 	$(LOCAL_PATH) \
-	$(LOCAL_PATH)/include/drm
+	$(LOCAL_PATH)/include/drm \
+	$(LOCAL_PATH)/android
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils

@@ -29,10 +29,6 @@
 #ifndef FREEDRENO_PRIV_H_
 #define FREEDRENO_PRIV_H_
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
@@ -129,6 +125,7 @@ struct fd_pipe {
 	struct fd_device *dev;
 	enum fd_pipe_id id;
 	uint32_t gpu_id;
+	atomic_t refcnt;
 	const struct fd_pipe_funcs *funcs;
 };
 
@@ -157,6 +154,7 @@ struct fd_bo_funcs {
 	int (*cpu_prep)(struct fd_bo *bo, struct fd_pipe *pipe, uint32_t op);
 	void (*cpu_fini)(struct fd_bo *bo);
 	int (*madvise)(struct fd_bo *bo, int willneed);
+	uint64_t (*iova)(struct fd_bo *bo);
 	void (*destroy)(struct fd_bo *bo);
 };
 

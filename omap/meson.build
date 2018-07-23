@@ -24,7 +24,7 @@ libdrm_omap = shared_library(
   include_directories : [inc_root, inc_drm],
   c_args : warn_c_args,
   link_with : libdrm,
-  dependencies : [dep_pthread_stubs],
+  dependencies : [dep_pthread_stubs, dep_atomic_ops],
   version : '1.0.0',
   install : true,
 )
@@ -49,5 +49,6 @@ pkg.generate(
 test(
   'omap-symbol-check',
   prog_bash,
+  env : env_test,
   args : [files('omap-symbol-check'), libdrm_omap]
 )

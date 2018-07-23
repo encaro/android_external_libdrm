@@ -26,10 +26,6 @@
  *    Rob Clark <robclark@freedesktop.org>
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
 #include "freedreno_drmif.h"
 #include "freedreno_priv.h"
 
@@ -193,6 +189,16 @@ out_unlock:
 	pthread_mutex_unlock(&table_lock);
 
 	return bo;
+}
+
+uint64_t fd_bo_get_iova(struct fd_bo *bo)
+{
+	return bo->funcs->iova(bo);
+}
+
+void fd_bo_put_iova(struct fd_bo *bo)
+{
+	/* currently a no-op */
 }
 
 struct fd_bo * fd_bo_ref(struct fd_bo *bo)

@@ -30,7 +30,7 @@
 /**
  * Define max. number of card in system which we are able to handle
  */
-#define MAX_CARDS_SUPPORTED     4
+#define MAX_CARDS_SUPPORTED     128
 
 /* Forward reference for array to keep "drm" handles */
 extern int drm_amdgpu[MAX_CARDS_SUPPORTED];
@@ -350,26 +350,26 @@ amdgpu_get_bo_list(amdgpu_device_handle dev, amdgpu_bo_handle bo1,
 }
 
 
-static inline CU_ErrorCode amdgpu_set_suite_active(const char *suit_name,
+static inline CU_ErrorCode amdgpu_set_suite_active(const char *suite_name,
 							  CU_BOOL active)
 {
-	CU_ErrorCode r = CU_set_suite_active(CU_get_suite(suit_name), active);
+	CU_ErrorCode r = CU_set_suite_active(CU_get_suite(suite_name), active);
 
 	if (r != CUE_SUCCESS)
-		fprintf(stderr, "Failed to obtain suite %s\n", suit_name);
+		fprintf(stderr, "Failed to obtain suite %s\n", suite_name);
 
 	return r;
 }
 
-static inline CU_ErrorCode amdgpu_set_test_active(const char *suit_name,
+static inline CU_ErrorCode amdgpu_set_test_active(const char *suite_name,
 				  const char *test_name, CU_BOOL active)
 {
 	CU_ErrorCode r;
-	CU_pSuite pSuite = CU_get_suite(suit_name);
+	CU_pSuite pSuite = CU_get_suite(suite_name);
 
 	if (!pSuite) {
 		fprintf(stderr, "Failed to obtain suite %s\n",
-				suit_name);
+				suite_name);
 		return CUE_NOSUITE;
 	}
 

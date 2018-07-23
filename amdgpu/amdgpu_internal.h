@@ -25,10 +25,6 @@
 #ifndef _AMDGPU_INTERNAL_H_
 #define _AMDGPU_INTERNAL_H_
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <assert.h>
 #include <pthread.h>
 
@@ -73,7 +69,6 @@ struct amdgpu_device {
 	int flink_fd;
 	unsigned major_version;
 	unsigned minor_version;
-	uint32_t address32_hi;
 
 	char *marketing_name;
 	/** List of buffer handles. Protected by bo_table_mutex. */
@@ -84,10 +79,14 @@ struct amdgpu_device {
 	pthread_mutex_t bo_table_mutex;
 	struct drm_amdgpu_info_device dev_info;
 	struct amdgpu_gpu_info info;
-	/** The global VA manager for the whole virtual address space */
+	/** The VA manager for the lower virtual address space */
 	struct amdgpu_bo_va_mgr vamgr;
 	/** The VA manager for the 32bit address space */
 	struct amdgpu_bo_va_mgr vamgr_32;
+	/** The VA manager for the high virtual address space */
+	struct amdgpu_bo_va_mgr vamgr_high;
+	/** The VA manager for the 32bit high address space */
+	struct amdgpu_bo_va_mgr vamgr_high_32;
 };
 
 struct amdgpu_bo {

@@ -25,7 +25,7 @@ libdrm_nouveau = shared_library(
   c_args : warn_c_args,
   include_directories : [inc_root, inc_drm],
   link_with : libdrm,
-  dependencies : dep_threads,
+  dependencies : [dep_threads, dep_atomic_ops],
   version : '2.0.0',
   install : true,
 )
@@ -54,5 +54,6 @@ pkg.generate(
 test(
   'nouveau-symbol-check',
   prog_bash,
+  env : env_test,
   args : [files('nouveau-symbol-check'), libdrm_nouveau]
 )

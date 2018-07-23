@@ -20,7 +20,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([libdrm],
-        [2.4.90],
+        [2.4.92],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=DRI],
         [libdrm])
 
@@ -45,6 +45,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Check for programs
 AC_PROG_CC
 AC_PROG_CC_C99
+AC_PROG_NM
 
 if test "x$ac_cv_prog_cc_c99" = xno; then
 	AC_MSG_ERROR([Building libdrm requires C99 enabled compiler])
@@ -65,10 +66,10 @@ AC_CHECK_HEADERS([sys/sysctl.h sys/select.h])
 LT_PREREQ([2.2])
 LT_INIT([disable-static])
 
-dnl pthread-stubs is mandatory on BSD platforms, due to the nature of the
+dnl pthread-stubs is mandatory on some BSD platforms, due to the nature of the
 dnl project. Even then there's a notable issue as described in the project README
 case "$host_os" in
-linux* | cygwin* | darwin* | solaris* | *-gnu* | gnu*)
+linux* | cygwin* | darwin* | solaris* | *-gnu* | gnu* | openbsd*)
     pthread_stubs_possible="no"
     ;;
 * )
@@ -193,7 +194,9 @@ AC_CHECK_FUNCS([clock_gettime], [CLOCK_LIB=],
                              [AC_MSG_ERROR([Couldn't find clock_gettime])])])
 AC_SUBST([CLOCK_LIB])
 
-AC_CHECK_FUNCS([open_memstream], [HAVE_OPEN_MEMSTREAM=yes])
+AC_CHECK_FUNCS([open_memstream],
+               [AC_DEFINE([HAVE_OPEN_MEMSTREAM], 1, [Have open_memstream()])],
+               [AC_DEFINE([HAVE_OPEN_MEMSTREAM], 0)])
 
 dnl Use lots of warning flags with with gcc and compatible compilers
 
@@ -349,6 +352,8 @@ AC_SUBST(PCIACCESS_LIBS)
 
 if test "x$UDEV" = xyes; then
 	AC_DEFINE(UDEV, 1, [Have UDEV support])
+else
+	AC_DEFINE(UDEV, 0)
 fi
 
 AC_CANONICAL_HOST
@@ -541,7 +546,11 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
 
 if test "x$HAVE_ATTRIBUTE_VISIBILITY" = xyes; then
     AC_DEFINE(HAVE_VISIBILITY, 1, [Compiler supports __attribute__(("hidden"))])
+else
+    AC_DEFINE(HAVE_VISIBILITY, 0)
 fi
+
+CFLAGS="$CFLAGS -include config.h"
 
 AC_SUBST(WARN_CFLAGS)
 AC_CONFIG_FILES([

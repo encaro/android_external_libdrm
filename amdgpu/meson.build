@@ -37,7 +37,7 @@ libdrm_amdgpu = shared_library(
   ],
   include_directories : [inc_root, inc_drm],
   link_with : libdrm,
-  dependencies : dep_pthread_stubs,
+  dependencies : [dep_pthread_stubs, dep_atomic_ops],
   version : '1.0.0',
   install : true,
 )
@@ -61,5 +61,6 @@ ext_libdrm_amdgpu = declare_dependency(
 test(
   'amdgpu-symbol-check',
   prog_bash,
+  env : env_test,
   args : [files('amdgpu-symbol-check'), libdrm_amdgpu]
 )
