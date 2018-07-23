@@ -14,10 +14,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _UAPI_TEGRA_DRM_H_
-#define _UAPI_TEGRA_DRM_H_
+#ifndef _TEGRA_DRM_H_
+#define _TEGRA_DRM_H_
 
-#include <drm/drm.h>
+#include "drm.h"
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 #define DRM_TEGRA_GEM_CREATE_TILED     (1 << 0)
 #define DRM_TEGRA_GEM_CREATE_BOTTOM_UP (1 << 1)
@@ -228,5 +232,9 @@ struct drm_tegra_keepon {
 #define DRM_IOCTL_TEGRA_SET_CLK_RATE DRM_IOWR(DRM_COMMAND_BASE + DRM_TEGRA_SET_CLK_RATE, struct drm_tegra_set_clk_rate)
 #define DRM_IOCTL_TEGRA_START_KEEPON DRM_IOWR(DRM_COMMAND_BASE + DRM_TEGRA_START_KEEPON, struct drm_tegra_keepon)
 #define DRM_IOCTL_TEGRA_STOP_KEEPON DRM_IOWR(DRM_COMMAND_BASE + DRM_TEGRA_STOP_KEEPON, struct drm_tegra_keepon)
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif

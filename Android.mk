@@ -29,6 +29,8 @@ LIBDRM_COMMON_MK := $(call my-dir)/Android.common.mk
 
 LOCAL_PATH := $(call my-dir)
 
+LIBDRM_TOP := $(LOCAL_PATH)
+
 # Import variables LIBDRM_{,H_,INCLUDE_H_,INCLUDE_VMWGFX_H_}FILES
 include $(LOCAL_PATH)/Makefile.sources
 
@@ -97,7 +99,8 @@ LOCAL_VENDOR_MODULE := true
 LOCAL_SRC_FILES := $(filter-out %.h,$(LIBDRM_FILES))
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
 	$(LOCAL_PATH) \
-	$(LOCAL_PATH)/include/drm
+	$(LOCAL_PATH)/include/drm \
+	$(LOCAL_PATH)/android
 
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/include/drm
@@ -118,6 +121,9 @@ LOCAL_SRC_FILES := $(filter-out %.h,$(LIBDRM_FILES))
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
 	$(LOCAL_PATH) \
 	$(LOCAL_PATH)/include/drm
+
+LOCAL_SHARED_LIBRARIES := \
+	libcutils
 
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/include/drm

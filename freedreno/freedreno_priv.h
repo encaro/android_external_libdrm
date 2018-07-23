@@ -49,6 +49,7 @@
 #include "xf86atomic.h"
 
 #include "util_double_list.h"
+#include "util_math.h"
 
 #include "freedreno_drmif.h"
 #include "freedreno_ringbuffer.h"
@@ -66,7 +67,8 @@ struct fd_device_funcs {
 			uint32_t flags, uint32_t *handle);
 	struct fd_bo * (*bo_from_handle)(struct fd_device *dev,
 			uint32_t size, uint32_t handle);
-	struct fd_pipe * (*pipe_new)(struct fd_device *dev, enum fd_pipe_id id);
+	struct fd_pipe * (*pipe_new)(struct fd_device *dev, enum fd_pipe_id id,
+			unsigned prio);
 	void (*destroy)(struct fd_device *dev);
 };
 
@@ -102,6 +104,9 @@ struct fd_device {
 	struct fd_bo_cache bo_cache;
 
 	int closefd;        /* call close(fd) upon destruction */
+
+	/* just for valgrind: */
+	int bo_size;
 };
 
 drm_private void fd_bo_cache_init(struct fd_bo_cache *cache, int coarse);
@@ -169,7 +174,6 @@ struct fd_bo {
 	time_t free_time;        /* time when added to bucket-list */
 };
 
-#define ALIGN(v,a) (((v) + (a) - 1) & ~((a) - 1))
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 #define enable_debug 0  /* TODO make dynamic */
@@ -195,5 +199,58 @@ offset_bytes(void *end, void *start)
 {
 	return ((char *)end) - ((char *)start);
 }
+
+#if HAVE_VALGRIND
+#  include <memcheck.h>
+
+/*
+ * For tracking the backing memory (if valgrind enabled, we force a mmap
+ * for the purposes of tracking)
+ */
+static inline void VG_BO_ALLOC(struct fd_bo *bo)
+{
+	if (bo && RUNNING_ON_VALGRIND) {
+		VALGRIND_MALLOCLIKE_BLOCK(fd_bo_map(bo), bo->size, 0, 1);
+	}
+}
+
+static inline void VG_BO_FREE(struct fd_bo *bo)
+{
+	VALGRIND_FREELIKE_BLOCK(bo->map, 0);
+}
+
+/*
+ * For tracking bo structs that are in the buffer-cache, so that valgrind
+ * doesn't attribute ownership to the first one to allocate the recycled
+ * bo.
+ *
+ * Note that the list_head in fd_bo is used to track the buffers in cache
+ * so disable error reporting on the range while they are in cache so
+ * valgrind doesn't squawk about list traversal.
+ *
+ */
+static inline void VG_BO_RELEASE(struct fd_bo *bo)
+{
+	if (RUNNING_ON_VALGRIND) {
+		VALGRIND_DISABLE_ADDR_ERROR_REPORTING_IN_RANGE(bo, bo->dev->bo_size);
+		VALGRIND_MAKE_MEM_NOACCESS(bo, bo->dev->bo_size);
+		VALGRIND_FREELIKE_BLOCK(bo->map, 0);
+	}
+}
+static inline void VG_BO_OBTAIN(struct fd_bo *bo)
+{
+	if (RUNNING_ON_VALGRIND) {
+		VALGRIND_MAKE_MEM_DEFINED(bo, bo->dev->bo_size);
+		VALGRIND_ENABLE_ADDR_ERROR_REPORTING_IN_RANGE(bo, bo->dev->bo_size);
+		VALGRIND_MALLOCLIKE_BLOCK(bo->map, bo->size, 0, 1);
+	}
+}
+#else
+static inline void VG_BO_ALLOC(struct fd_bo *bo)   {}
+static inline void VG_BO_FREE(struct fd_bo *bo)    {}
+static inline void VG_BO_RELEASE(struct fd_bo *bo) {}
+static inline void VG_BO_OBTAIN(struct fd_bo *bo)  {}
+#endif
+
 
 #endif /* FREEDRENO_PRIV_H_ */
